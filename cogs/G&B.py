@@ -42,8 +42,14 @@ class Scout():
     def __init__(self,target=None,user=None):
         self.target=target
         self.user=user
+class Bacchus():
+    def __init__(self,target=None,user=None,alarm=False,bac_list=[]):
+        self.target=target
+        self.user=user
+        self.alarm=alarm
+        self.bac_list=bac_list
 #
-roleList = [Dedective(),Sorceress(),Nurse(),Scout()]\
+roleList = [Dedective(),Sorceress(),Nurse(),Scout(),Bacchus()]
 
 
 
@@ -57,6 +63,15 @@ class GBAbilites(commands.Cog):
         ctxindex=GBnames[idx].index(str(ctx.author))
         try:
             GBplayers[idx][ctxindex].target=target
+            GBplayers[idx][ctxindex].user=ctx.author
+        except:
+            pass
+
+    @commands.command()
+    async def alarm(self,ctx):
+        ctxindex = GBnames[idx].index(str(ctx.author))
+        try:
+            GBplayers[idx][ctxindex].alarm=True
             GBplayers[idx][ctxindex].user=ctx.author
         except:
             pass
@@ -100,12 +115,14 @@ class GB(commands.Cog):
             GBalive[idx].append(members[i])
             GBnames[idx].append(str(members[i]))
             GBplayers[idx][i]=random.choice(roleList)
-        GBplayers[idx][0] = Scout()
+        GBplayers[idx][0] = Bacchus()
         GBplayers[idx][1] = Dedective()
         while Game:
             for i in range(0,10000):
                 if i%2==0:
                     await ctx.send(f"```Day {day}```")
+
+
 
 
 
@@ -117,23 +134,46 @@ class GB(commands.Cog):
                     await ctx.send(f"```Night {night}```")
 
 
-                    for player in GBplayers[idx]:
-                        if player.target is not None and str(player.__class__.__name__)=="Dedective" and GBalive[idx].count(player.user)==1:
-                            de_result = GBplayers[idx][int(player.target)].__class__.__name__
+                    for d_player in GBplayers[idx]:
+                        if d_player.target is not None and str(d_player.__class__.__name__)=="Dedective" and GBalive[idx].count(d_player.user)==1:
+                            de_result = GBplayers[idx][int(d_player.target)].__class__.__name__
                             gameresult = [de_result, de_result,de_result,random.choice(roleList).__class__.__name__]
-                            await player.user.send(str(random.choice(gameresult)))
-                    for player in GBplayers[idx]:
-                        if player.target is not None and str(player.__class__.__name__)=="Scout" and GBalive[idx].count(player.user)==1:
+                            await d_player.user.send(str(random.choice(gameresult)))
+                    for sc_player in GBplayers[idx]:
+                        if sc_player.target is not None and str(sc_player.__class__.__name__)=="Scout" and GBalive[idx].count(sc_player.user)==1:
                             try:
-                                sc_result=GBplayers[idx][int(player.target)].target
-                                await player.user.send(sc_result)
+                                sc_result=GBplayers[idx][int(sc_player.target)].target
+                                await sc_player.user.send(sc_result)
                             except:
-                                await player.user.send("Your target didn't move")
+                                await sc_player.user.send("Your target didn't move")
 
+                    for bac_player in GBplayers[idx]:
+                        try:
+                            if bac_player.alarm is True and str(bac_player.__class__.__name__)=="Bacchus" and GBalive[idx].count(bac_player.user)==1:
+                                for b_player in GBplayers[idx]:
+                                    try:
+                                        if GBplayers[idx][int(b_player.target)].user==bac_player.user:
+                                            print("t1")
+                                            for i in GBalive[idx]:
+                                                if str(i)==str(b_player.user):
+                                                    print("abw")
+                                                    bac_player.bac_list.append(i)
+                                                    print("asdasdasd")
+
+                                    except:
+                                        pass
+
+
+
+                        except:
+                            pass
+                        ##Düzeltilecek büyük ihtimal pop index kabul ediyor
+                        GBalive[idx].pop(random.choice(bac_player.bac_list))
+                        print(GBalive[idx])
 
 
                     countdown(3)
-                    night+=1
+                    night += 1
 
 
 
