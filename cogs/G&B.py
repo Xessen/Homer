@@ -184,7 +184,7 @@ class GB(commands.Cog):
 
                             if sor_player.spell==str(1):
                                 try:
-                                    GBalive.append(GBcopyplayers[idx][int(sor_player.target)])
+                                    GBalive[idx].append(GBcopyplayers[idx][int(sor_player.target)])
                                 except:
                                     print("err sorceress1")
                             elif sor_player.spell==str(2):
