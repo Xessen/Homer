@@ -9,7 +9,7 @@ tracemalloc.start()
 GBplayers= {}
 GBnames= {}
 GBalive= {}
-GBdead={}
+GBcopyplayers={}
 '''
 
 ###Eğer ki performans kötü olursa her rol için dict içinde list hazırla ve rol yeteneklerini aktifleştirirken o listleri iteratele
@@ -31,9 +31,11 @@ class Dedective():
         self.target=target
         self.user=user
 class Sorceress():
-    def __init__(self,target=None,user=None):
+    def __init__(self,target=None,user=None,spell=None,context=None):
         self.target=target
         self.user=user
+        self.spell=spell
+        self.context=context
 class Nurse():
     def __init__(self,target=None,user=None):
         self.target=target
@@ -76,7 +78,15 @@ class GBAbilites(commands.Cog):
         except:
             pass
 
-
+    @commands.command()
+    async def spell(self,ctx,spell=None,context=None):
+        ctxindex = GBnames[idx].index(str(ctx.author))
+        try:
+            GBplayers[idx][ctxindex].spell=spell
+            GBplayers[idx][ctxindex].user=ctx.author
+            GBplayers[idx][ctxindex].context=context
+        except:
+            pass
 
 
 
@@ -107,11 +117,12 @@ class GB(commands.Cog):
         GBplayers[idx] = []
         GBalive[idx] = []
         GBnames[idx] = []
-        GBdead[idx] = []
+        GBcopyplayers[idx] = []
 
         for i in range(memberCount):
             await ctx.send(f"{str(members[i])}={str(i)}")
             GBplayers[idx].append(members[i])
+            GBcopyplayers[idx].append(members[i])
             GBalive[idx].append(members[i])
             GBnames[idx].append(str(members[i]))
             GBplayers[idx][i]=random.choice(roleList)
@@ -139,6 +150,7 @@ class GB(commands.Cog):
                             de_result = GBplayers[idx][int(d_player.target)].__class__.__name__
                             gameresult = [de_result, de_result,de_result,random.choice(roleList).__class__.__name__]
                             await d_player.user.send(str(random.choice(gameresult)))
+
                     for sc_player in GBplayers[idx]:
                         if sc_player.target is not None and str(sc_player.__class__.__name__)=="Scout" and GBalive[idx].count(sc_player.user)==1:
                             try:
@@ -153,25 +165,38 @@ class GB(commands.Cog):
                                 for b_player in GBplayers[idx]:
                                     try:
                                         if GBplayers[idx][int(b_player.target)].user==bac_player.user:
-                                            print("t1")
+
                                             for i in GBalive[idx]:
                                                 if str(i)==str(b_player.user):
-                                                    print("abw")
                                                     bac_player.bac_list.append(i)
-                                                    print("asdasdasd")
 
                                     except:
                                         pass
-
-
-
                         except:
                             pass
-                        ##Düzeltilecek büyük ihtimal pop index kabul ediyor
-                        GBalive[idx].pop(random.choice(bac_player.bac_list))
-                        print(GBalive[idx])
+                        try:
+                            GBalive[idx].remove(random.choice(bac_player.bac_list))
+                        except:
+                            pass
 
+                    for sor_player in GBplayers[idx]:
+                        if sor_player.spell is True and str(sor_player.__class__.__name__) == "Sorceress" and GBalive[idx].count(sor_player.user) == 1:
 
+                            if sor_player.spell==str(1):
+                                try:
+                                    GBalive.append(GBcopyplayers[idx][int(sor_player.target)])
+                                except:
+                                    print("err sorceress1")
+                            elif sor_player.spell==str(2):
+                                try:
+                                    GBplayers[idx][int(str(sor_player.context)[0])].user.send(f"Someone whispered to you ear while sleeping '{str(sor_player.context)[1:]}' ")
+                                except:
+                                    print("err sorceress2")
+                            elif sor_player.spell==str(3):
+                                sorr=GBcopyplayers[idx].index(random.choice(GBalive[idx]))
+                                nname=GBplayers[idx][int(sorr)].user
+                                nclass=GBplayers[idx][int(sorr)].__class__.__name__
+                                ctx.send(f"An unknown power revealed the true identity of {str(nname)}! a {str(nclass)}")
                     countdown(3)
                     night += 1
 
