@@ -126,8 +126,7 @@ class GB(commands.Cog):
             GBalive[idx].append(members[i])
             GBnames[idx].append(str(members[i]))
             GBplayers[idx][i]=random.choice(roleList)
-        GBplayers[idx][0] = Bacchus()
-        GBplayers[idx][1] = Dedective()
+
         while Game:
             for i in range(0,10000):
                 if i%2==0:
